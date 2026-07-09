@@ -1,0 +1,85 @@
+.map-container {
+  width: 100%;
+  height: 100%;
+  background: #eef1f3;
+}
+
+/* Desatura ligeramente el mapa base para que los puntos de color destaquen */
+.leaflet-tile-pane {
+  filter: saturate(0.55) brightness(1.03);
+}
+
+.marker-wrapper {
+  position: relative;
+  width: 34px;
+  height: 34px;
+}
+
+.marker-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+
+.marker-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Reportes < 24h: anillo rojo con pulso activo — la "herida abierta" */
+.marker-ring--red {
+  background: var(--ring-24h);
+  border: 1.5px solid var(--ring-24h-border);
+  animation: pulse-ring 2.2s ease-out infinite;
+}
+
+/* Reportes entre 24h y 7 días: anillo amarillo, pulso más lento y sutil */
+.marker-ring--yellow {
+  background: var(--ring-week);
+  border: 1.5px solid var(--ring-week-border);
+  animation: pulse-ring 3.6s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.75);
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.9);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker-ring--red,
+  .marker-ring--yellow {
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
+/* Controles de zoom reposicionados para no chocar con paneles flotantes */
+.leaflet-control-zoom {
+  margin-top: 90px !important;
+  border-radius: var(--radius-sm) !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-md) !important;
+}

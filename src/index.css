@@ -1,13 +1,115 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  /* ── Color ─────────────────────────────────────────── */
+  --navy-900: #1a242f;
+  --navy-800: #2c3e50;
+  --navy-700: #34495e;
+  --navy-600: #46607a;
+
+  --bg-app: #f4f6f8;
+  --surface: #ffffff;
+  --surface-glass: rgba(255, 255, 255, 0.86);
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --text-primary: #1f2937;
+  --text-secondary: #64748b;
+  --text-inverse: #f4f6f8;
+
+  --accent: #17a2a0;
+  --accent-dark: #128a88;
+  --accent-soft: #e3f6f5;
+
+  --danger: #e74c3c;
+  --danger-soft: #fdecea;
+  --success: #27ae60;
+
+  /* Tipos de delito */
+  --tipo-robo: #e74c3c;
+  --tipo-extorsion: #9b59b6;
+  --tipo-asalto: #e67e22;
+  --tipo-vandalismo: #f1c40f;
+  --tipo-acoso: #ec4899;
+  --tipo-fraude: #34495e;
+  --tipo-otro: #7f8c8d;
+
+  /* Anillos de urgencia */
+  --ring-24h: rgba(231, 76, 60, 0.32);
+  --ring-24h-border: rgba(231, 76, 60, 0.55);
+  --ring-week: rgba(241, 196, 15, 0.32);
+  --ring-week-border: rgba(241, 196, 15, 0.55);
+
+  /* ── Tipografía ────────────────────────────────────── */
+  --font-display: "Sora", "Segoe UI", sans-serif;
+  --font-body: "Inter", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+
+  /* ── Layout ────────────────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 2px rgba(26, 36, 47, 0.06), 0 1px 3px rgba(26, 36, 47, 0.08);
+  --shadow-md: 0 8px 24px rgba(26, 36, 47, 0.12);
+  --shadow-lg: 0 16px 48px rgba(26, 36, 47, 0.18);
+  --nav-height: 68px;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--navy-800);
+  margin: 0;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font-family: var(--font-body);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* Respeta preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

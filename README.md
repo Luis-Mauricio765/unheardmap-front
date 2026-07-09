@@ -1,70 +1,62 @@
-# Getting Started with Create React App
+# Unheard Map — Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Mapa colaborativo de reportes de incidentes, construido con React + Leaflet.
 
-## Available Scripts
+## Stack
 
-In the project directory, you can run:
+- React 18 + Vite
+- react-leaflet (OpenStreetMap, sin costo/API key)
+- react-router-dom
+- axios (con interceptor de JWT)
 
-### `npm start`
+## Desarrollo local
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+npm install
+cp .env.example .env      # edita VITE_API_URL si tu backend no corre en localhost:8080
+npm run dev
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Abre http://localhost:5173
 
-### `npm test`
+## Build de producción
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm run build
+```
 
-### `npm run build`
+Genera la carpeta `dist/`.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Despliegue en Netlify
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Sube este proyecto a un repositorio de GitHub.
+2. En Netlify: "Add new site" → "Import an existing project".
+3. Build command: `npm run build`
+4. Publish directory: `dist`
+5. En "Environment variables" agrega:
+   - `VITE_API_URL` = la URL de tu backend en Render (ej. `https://unheard-map-api.onrender.com`)
+6. El archivo `public/_redirects` ya está incluido para que las rutas de
+   React Router (`/login`, `/registro`) funcionen al recargar la página.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Notas importantes antes de producción
 
-### `npm run eject`
+- **CORS**: agrega el dominio final de Netlify (ej. `https://unheard-map.netlify.app`)
+  a `CorsConfig.java` en el backend.
+- **Iconos de Leaflet**: se usan `divIcon` personalizados (los puntos de color),
+  así que no necesitas los PNG por defecto de Leaflet.
+- **Rendimiento con muchos reportes**: el mapa consulta por bounding box
+  (`GET /api/reportes?latMin=...`), así que solo carga lo visible en pantalla.
+  Si el volumen crece mucho, considera clustering (`react-leaflet-cluster`).
+- Los anillos de pulso (`.marker-ring--red` / `--yellow`) respetan
+  `prefers-reduced-motion`.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Estructura
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+src/
+├── api/            # cliente axios + endpoints (auth, reportes)
+├── components/      # Navbar, MapView, FilterPanel, ReportDetailPanel, ReportFormModal
+├── context/          # AuthContext (JWT en localStorage)
+├── pages/            # MapPage, LoginPage, RegisterPage
+└── utils/            # tipos de delito, helpers de fecha/urgencia
+```
