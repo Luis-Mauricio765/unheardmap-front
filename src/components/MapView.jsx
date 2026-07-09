@@ -8,6 +8,7 @@ import "./MapView.css";
 
 const CENTRO_INICIAL = [-12.0464, -77.0428]; // Lima como punto de partida (mapa es mundial)
 const ZOOM_INICIAL = 13;
+const ZOOM_MINIMO_MARCADORES = 12; // por debajo de este nivel, se ocultan los puntos
 
 // Crea el ícono divIcon: punto + anillo de pulso según urgencia
 function crearIcono(tipo, fechaSuceso) {
@@ -29,10 +30,13 @@ function crearIcono(tipo, fechaSuceso) {
 
 // Sincroniza el mapa con el estado del bounding box (para recargar al mover/zoom)
 // y, cuando el modo "marcar ubicación" está activo, captura el clic del usuario.
-function BoundsWatcher({ onBoundsChange, modoMarcar, onPickLocation }) {
+function BoundsWatcher({ onBoundsChange, onZoomChange, modoMarcar, onPickLocation }) {
   const map = useMapEvents({
     moveend: () => onBoundsChange(map.getBounds()),
-    zoomend: () => onBoundsChange(map.getBounds()),
+    zoomend: () => {
+      onBoundsChange(map.getBounds());
+      onZoomChange(map.getZoom());
+    },
     click: (e) => {
       if (modoMarcar) onPickLocation(e.latlng);
     },
@@ -40,7 +44,9 @@ function BoundsWatcher({ onBoundsChange, modoMarcar, onPickLocation }) {
 
   useEffect(() => {
     onBoundsChange(map.getBounds());
-  }, [map, onBoundsChange]);
+    onZoomChange(map.getZoom());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map]);
 
   // Cambia el cursor a "crosshair" mientras se está eligiendo ubicación
   useEffect(() => {
@@ -99,12 +105,22 @@ export default function MapView({
   onPickLocation = () => {},
 }) {
   const [reportes, setReportes] = useState([]);
+  const [zoomActual, setZoomActual] = useState(ZOOM_INICIAL);
   const boundsRef = useRef(null);
+  const zoomRef = useRef(ZOOM_INICIAL);
 
   const cargarReportes = useCallback(
     async (bounds) => {
       if (!bounds) return;
       boundsRef.current = bounds;
+
+      // Si está muy alejado, ni siquiera consultamos al backend: evita
+      // pedir de golpe reportes de medio continente y saturar el mapa.
+      if (zoomRef.current < ZOOM_MINIMO_MARCADORES) {
+        setReportes([]);
+        return;
+      }
+
       try {
         const data = await listarReportes({
           latMin: bounds.getSouth(),
@@ -121,10 +137,22 @@ export default function MapView({
     [filtroTipo]
   );
 
+  const manejarCambioZoom = useCallback(
+    (zoom) => {
+      zoomRef.current = zoom;
+      setZoomActual(zoom);
+      if (boundsRef.current) cargarReportes(boundsRef.current);
+    },
+    [cargarReportes]
+  );
+
   // Re-consulta cuando cambia el filtro o cuando se crea un reporte nuevo
   useEffect(() => {
     if (boundsRef.current) cargarReportes(boundsRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtroTipo, refrescarTick, cargarReportes]);
+
+  const marcadoresOcultosPorZoom = zoomActual < ZOOM_MINIMO_MARCADORES;
 
   return (
     <MapContainer
@@ -139,10 +167,15 @@ export default function MapView({
       />
       <BoundsWatcher
         onBoundsChange={cargarReportes}
+        onZoomChange={manejarCambioZoom}
         modoMarcar={modoMarcar}
         onPickLocation={onPickLocation}
       />
       <MarkerLayer reportes={reportes} onSelect={onSelectReporte} />
+
+      {marcadoresOcultosPorZoom && (
+        <div className="map-zoom-hint">Acércate más para ver los reportes de la zona</div>
+      )}
     </MapContainer>
   );
 }
