@@ -7,7 +7,6 @@ import {
   eliminarReporteAdmin,
 } from "../api/admin";
 import { labelDeTipo } from "../utils/crimeTypes";
-import { formatearFechaCompleta } from "../utils/dateHelpers";
 import "./AdminDashboard.css";
 
 export default function AdminDashboardPage() {
@@ -90,7 +89,8 @@ export default function AdminDashboardPage() {
             <tr>
               <th>ID</th>
               <th>Tipo</th>
-              <th>Fecha del suceso</th>
+              <th>Descripción</th>
+              <th>Publicado por</th>
               <th>Puntuación</th>
               <th></th>
             </tr>
@@ -100,7 +100,8 @@ export default function AdminDashboardPage() {
               <tr key={r.id}>
                 <td>{r.id}</td>
                 <td>{labelDeTipo(r.tipo)}</td>
-                <td>{formatearFechaCompleta(r.fechaSuceso)}</td>
+                <td className="admin-table__descripcion">{r.descripcion}</td>
+                <td>@{r.usuarioUsername}</td>
                 <td>{r.puntuacion}</td>
                 <td>
                   <button className="admin-btn admin-btn--danger" onClick={() => manejarEliminarReporte(r.id)}>
@@ -111,7 +112,7 @@ export default function AdminDashboardPage() {
             ))}
             {reportes.length === 0 && (
               <tr>
-                <td colSpan={5}>No hay reportes.</td>
+                <td colSpan={6}>No hay reportes.</td>
               </tr>
             )}
           </tbody>
@@ -123,8 +124,8 @@ export default function AdminDashboardPage() {
           <thead>
             <tr>
               <th>Usuario</th>
-              <th>Email</th>
               <th>Rol</th>
+              <th>Publicaciones</th>
               <th>Estado</th>
               <th></th>
             </tr>
@@ -133,8 +134,8 @@ export default function AdminDashboardPage() {
             {usuarios.map((u) => (
               <tr key={u.id}>
                 <td>@{u.username}</td>
-                <td>{u.email}</td>
                 <td>{u.rol}</td>
+                <td>{u.totalReportes}</td>
                 <td>
                   <span className={`admin-status ${u.activo ? "is-active" : "is-banned"}`}>
                     {u.activo ? "Activo" : "Baneado"}
