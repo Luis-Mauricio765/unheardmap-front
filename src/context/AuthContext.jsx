@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
       setToken(token);
       return true;
     } catch (err) {
-      setError(err.response?.data?.mensaje || "Usuario o contraseña incorrectos");
+      setError(err.response?.data?.mensaje || "No se pudo iniciar sesión");
       return false;
     } finally {
       setCargando(false);
