@@ -104,6 +104,7 @@
 
 .pago-form__row .pago-field {
   flex: 1;
+  min-width: 0;
 }
 
 .pago-field {
@@ -119,6 +120,8 @@
 }
 
 .pago-field input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 11px 13px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);

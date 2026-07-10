@@ -6,6 +6,12 @@ import { pagarMembresia } from "../api/membresia";
 import { formatearFechaCompleta } from "../utils/dateHelpers";
 import "./PagoMembresia.css";
 
+// Agrupa el número de tarjeta en bloques de 4 dígitos: "0000 0000 0000 0000"
+function formatearNumeroTarjeta(valor) {
+  const digitos = valor.replace(/\D/g, "").slice(0, 16);
+  return digitos.match(/.{1,4}/g)?.join(" ") ?? digitos;
+}
+
 const BENEFICIOS = [
   "Navega sin anuncios",
   "Panel de Estadísticas con gráficos y tendencias",
@@ -59,8 +65,8 @@ export default function PagoMembresiaPage() {
           )}
 
           <div className="pago-card__precio">
-            <span className="pago-card__monto">S/ 9.90</span>
-            <span className="pago-card__periodo">/ 30 días</span>
+            <span className="pago-card__monto">$15</span>
+            <span className="pago-card__periodo">/ mes</span>
           </div>
 
           <ul className="pago-card__beneficios">
@@ -90,7 +96,7 @@ export default function PagoMembresiaPage() {
                 inputMode="numeric"
                 maxLength={19}
                 value={tarjeta}
-                onChange={(e) => setTarjeta(e.target.value.replace(/[^\d ]/g, ""))}
+                onChange={(e) => setTarjeta(formatearNumeroTarjeta(e.target.value))}
                 placeholder="0000 0000 0000 0000"
                 required
               />
@@ -115,9 +121,9 @@ export default function PagoMembresiaPage() {
                   id="cvv"
                   type="password"
                   inputMode="numeric"
-                  maxLength={4}
+                  maxLength={3}
                   value={cvv}
-                  onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 3))}
                   placeholder="123"
                   required
                 />
