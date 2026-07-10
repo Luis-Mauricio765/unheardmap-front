@@ -4,11 +4,12 @@ import MapView from "../components/MapView";
 import FilterPanel from "../components/FilterPanel";
 import ReportDetailPanel from "../components/ReportDetailPanel";
 import ReportFormModal from "../components/ReportFormModal";
+import AdPlaceholder from "../components/AdPlaceholder";
 import { useAuth } from "../context/AuthContext";
 import "./MapPage.css";
 
 export default function MapPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, esMiembro } = useAuth();
   const [filtroTipo, setFiltroTipo] = useState(null);
   const [reporteSeleccionado, setReporteSeleccionado] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -60,6 +61,8 @@ export default function MapPage() {
             Inicia sesión para reportar un incidente o valorar los existentes
           </div>
         )}
+
+        {!esMiembro && <AdPlaceholder />}
 
         <ReportDetailPanel
           reporteId={reporteSeleccionado}

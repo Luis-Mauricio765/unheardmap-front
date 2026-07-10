@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { login as loginRequest, register as registerRequest } from "../api/auth";
+import { obtenerMe } from "../api/usuarios";
 
 const AuthContext = createContext(null);
 
@@ -16,8 +17,22 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("um_token"));
   const [username, setUsername] = useState(() => localStorage.getItem("um_user"));
   const [isAdmin, setIsAdmin] = useState(false);
+  const [usuarioMe, setUsuarioMe] = useState(null);
+  const [meCargado, setMeCargado] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
+
+  // Consulta /me para conocer el estado real de la membresía (el JWT no lo refleja)
+  const refrescarMe = useCallback(async () => {
+    try {
+      const me = await obtenerMe();
+      setUsuarioMe(me);
+    } catch {
+      setUsuarioMe(null);
+    } finally {
+      setMeCargado(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -28,13 +43,17 @@ export function AuthProvider({ children }) {
         localStorage.setItem("um_user", payload.sub);
       }
       setIsAdmin(Boolean(payload?.roles?.includes("ROLE_ADMIN")));
+      setMeCargado(false);
+      refrescarMe();
     } else {
       localStorage.removeItem("um_token");
       localStorage.removeItem("um_user");
       setUsername(null);
       setIsAdmin(false);
+      setUsuarioMe(null);
+      setMeCargado(true);
     }
-  }, [token]);
+  }, [token, refrescarMe]);
 
   const login = useCallback(async (credenciales) => {
     setCargando(true);
@@ -76,6 +95,10 @@ export function AuthProvider({ children }) {
         token,
         username,
         isAdmin,
+        esMiembro: Boolean(usuarioMe?.esMiembro) || isAdmin,
+        miembroHasta: usuarioMe?.miembroHasta ?? null,
+        meCargado,
+        refrescarMe,
         isAuthenticated: !!token,
         cargando,
         error,

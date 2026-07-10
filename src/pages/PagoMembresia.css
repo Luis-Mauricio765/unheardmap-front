@@ -1,0 +1,168 @@
+.pago-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--navy-800);
+}
+
+.pago-page__body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(23, 162, 160, 0.18), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(23, 162, 160, 0.12), transparent 45%),
+    var(--navy-800);
+}
+
+.pago-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 34px 32px 30px;
+  box-shadow: var(--shadow-lg);
+}
+
+.pago-card__eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+}
+
+.pago-card h1 {
+  font-size: 23px;
+  margin-top: 6px;
+}
+
+.pago-card__vigente {
+  margin-top: 10px;
+  font-size: 13px;
+  background: rgba(23, 162, 160, 0.12);
+  color: var(--accent-dark);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.pago-card__precio {
+  margin-top: 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pago-card__monto {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--navy-800);
+}
+
+.pago-card__periodo {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.pago-card__beneficios {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pago-card__beneficios li {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  padding-left: 22px;
+  position: relative;
+}
+
+.pago-card__beneficios li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.pago-form {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pago-form__row {
+  display: flex;
+  gap: 12px;
+}
+
+.pago-form__row .pago-field {
+  flex: 1;
+}
+
+.pago-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pago-field label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--navy-800);
+}
+
+.pago-field input {
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+.pago-field input:focus {
+  border-color: var(--accent);
+}
+
+.pago-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.pago-submit {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 14.5px;
+  margin-top: 4px;
+  transition: background 0.15s ease;
+}
+
+.pago-submit:hover:not(:disabled) {
+  background: var(--accent-dark);
+}
+
+.pago-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pago-note {
+  margin-top: 18px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}

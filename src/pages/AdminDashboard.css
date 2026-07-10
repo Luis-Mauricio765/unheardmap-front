@@ -110,6 +110,18 @@
   background: var(--accent);
 }
 
+.admin-btn--neutral {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.admin-acciones {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .admin-note {
   color: var(--text-secondary);
   font-size: 12.5px;

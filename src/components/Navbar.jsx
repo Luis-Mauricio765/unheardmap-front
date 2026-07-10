@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import "./Navbar.css";
 
 export default function Navbar({ onReportarClick }) {
-  const { isAuthenticated, username, isAdmin, logout } = useAuth();
+  const { isAuthenticated, username, isAdmin, esMiembro, logout } = useAuth();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const navigate = useNavigate();
 
@@ -21,6 +21,11 @@ export default function Navbar({ onReportarClick }) {
         <Link to="/" onClick={() => setMenuAbierto(false)}>
           Mapa
         </Link>
+        {isAuthenticated && (
+          <Link to="/estadisticas" onClick={() => setMenuAbierto(false)}>
+            Estadísticas
+          </Link>
+        )}
         <a href="#contacto" onClick={() => setMenuAbierto(false)}>
           Contacto
         </a>
@@ -42,6 +47,9 @@ export default function Navbar({ onReportarClick }) {
               </Link>
             )}
             <span className="navbar__username mono">@{username}</span>
+            {esMiembro && !isAdmin && (
+              <span className="navbar__member-badge">Miembro</span>
+            )}
             <button
               className="navbar__logout"
               onClick={() => {

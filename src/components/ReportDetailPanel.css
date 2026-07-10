@@ -137,6 +137,214 @@
   font-size: 14px;
 }
 
+/* ── Denuncias ─────────────────────────────────────────── */
+.detail-panel__denunciar {
+  margin-left: auto;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--danger);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.detail-panel__denunciar:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+.detail-panel__denuncia-form {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.detail-panel__denuncia-form label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy-800);
+}
+
+.detail-panel__denuncia-form select,
+.detail-panel__denuncia-form textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  background: var(--surface);
+  resize: vertical;
+}
+
+.detail-panel__denuncia-form button {
+  align-self: flex-end;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.detail-panel__denuncia-msg {
+  margin-top: 10px;
+  font-size: 12.5px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.detail-panel__denuncia-msg.is-ok {
+  background: rgba(23, 162, 160, 0.12);
+  color: var(--accent-dark);
+}
+
+.detail-panel__denuncia-msg.is-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ── Comentarios ───────────────────────────────────────── */
+.detail-panel__comentarios {
+  margin-top: 26px;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+}
+
+.detail-panel__comentarios h4 {
+  font-size: 14px;
+  color: var(--navy-800);
+}
+
+.detail-panel__comentarios-lista {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-panel__comentarios-lista li {
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.detail-panel__comentarios-lista li p {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.detail-panel__comentario-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-panel__comentario-autor {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy-800);
+}
+
+.detail-panel__comentario-fecha {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.detail-panel__comentario-borrar {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.detail-panel__comentario-borrar:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.detail-panel__comentarios-vacio {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  border: none !important;
+  background: transparent !important;
+}
+
+.detail-panel__comentario-form {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-panel__comentario-form textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  resize: vertical;
+}
+
+.detail-panel__comentario-form textarea:focus {
+  border-color: var(--accent);
+}
+
+.detail-panel__comentario-form button {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.detail-panel__comentario-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.detail-panel__comentarios-bloqueado {
+  margin-top: 12px;
+  width: 100%;
+  text-align: left;
+  background: var(--bg-app);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.detail-panel__comentarios-bloqueado span {
+  color: var(--accent-dark);
+  font-weight: 600;
+  font-size: 12.5px;
+}
+
+.detail-panel__comentarios-bloqueado:hover {
+  border-color: var(--accent);
+}
+
 @media (max-width: 640px) {
   .detail-panel {
     width: 100%;
