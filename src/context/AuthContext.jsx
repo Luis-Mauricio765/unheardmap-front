@@ -3,11 +3,10 @@ import { login as loginRequest, register as registerRequest } from "../api/auth"
 
 const AuthContext = createContext(null);
 
-// Decodifica el payload del JWT sin librerías externas (solo para leer el username)
-function decodeUsername(token) {
+// Decodifica el payload del JWT sin librerías externas
+function decodePayload(token) {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.sub || null;
+    return JSON.parse(atob(token.split(".")[1]));
   } catch {
     return null;
   }
@@ -16,21 +15,24 @@ function decodeUsername(token) {
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("um_token"));
   const [username, setUsername] = useState(() => localStorage.getItem("um_user"));
+  const [isAdmin, setIsAdmin] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (token) {
       localStorage.setItem("um_token", token);
-      const u = decodeUsername(token);
-      if (u) {
-        setUsername(u);
-        localStorage.setItem("um_user", u);
+      const payload = decodePayload(token);
+      if (payload?.sub) {
+        setUsername(payload.sub);
+        localStorage.setItem("um_user", payload.sub);
       }
+      setIsAdmin(Boolean(payload?.roles?.includes("ROLE_ADMIN")));
     } else {
       localStorage.removeItem("um_token");
       localStorage.removeItem("um_user");
       setUsername(null);
+      setIsAdmin(false);
     }
   }, [token]);
 
@@ -73,6 +75,7 @@ export function AuthProvider({ children }) {
       value={{
         token,
         username,
+        isAdmin,
         isAuthenticated: !!token,
         cargando,
         error,
