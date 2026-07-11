@@ -6,6 +6,7 @@ import RegisterPage from "./pages/RegisterPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import EstadisticasPage from "./pages/EstadisticasPage";
 import PagoMembresiaPage from "./pages/PagoMembresiaPage";
+import DonacionesPage from "./pages/DonacionesPage";
 import RequireAdmin from "./components/RequireAdmin";
 import RequireMiembro from "./components/RequireMiembro";
 
@@ -26,6 +27,7 @@ export default function App() {
             }
           />
           <Route path="/pagoMembresia" element={<PagoMembresiaPage />} />
+          <Route path="/donaciones" element={<DonacionesPage />} />
           <Route
             path="/estadisticas"
             element={

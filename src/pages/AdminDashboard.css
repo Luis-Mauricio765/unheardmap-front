@@ -122,6 +122,41 @@
   flex-wrap: wrap;
 }
 
+.admin-total-donado {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  margin-bottom: 14px;
+}
+
+.admin-total-donado strong {
+  color: var(--accent);
+  font-size: 15px;
+}
+
+.admin-form-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  background: var(--surface);
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.admin-form-row input {
+  flex: 1;
+  min-width: 140px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+}
+
+.admin-form-row input:focus {
+  border-color: var(--accent);
+}
+
 .admin-note {
   color: var(--text-secondary);
   font-size: 12.5px;

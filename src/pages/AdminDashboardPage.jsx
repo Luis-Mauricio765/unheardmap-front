@@ -9,6 +9,10 @@ import {
   descartarDenuncia,
   listarComentariosAdmin,
   eliminarComentarioAdmin,
+  listarMetasAdmin,
+  crearMeta,
+  eliminarMeta,
+  totalDonaciones,
 } from "../api/admin";
 import { labelDeTipo } from "../utils/crimeTypes";
 import { formatearFechaCompleta } from "../utils/dateHelpers";
@@ -29,23 +33,35 @@ export default function AdminDashboardPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [denuncias, setDenuncias] = useState([]);
   const [comentarios, setComentarios] = useState([]);
+  const [metas, setMetas] = useState([]);
+  const [totalDonado, setTotalDonado] = useState(0);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
+
+  // Formulario de nueva meta
+  const [metaTitulo, setMetaTitulo] = useState("");
+  const [metaDescripcion, setMetaDescripcion] = useState("");
+  const [metaObjetivo, setMetaObjetivo] = useState("");
+  const [creandoMeta, setCreandoMeta] = useState(false);
 
   const cargar = useCallback(async () => {
     setCargando(true);
     setError(null);
     try {
-      const [rs, us, ds, cs] = await Promise.all([
+      const [rs, us, ds, cs, ms, total] = await Promise.all([
         listarTodosReportes(),
         listarUsuarios(),
         listarDenuncias(),
         listarComentariosAdmin(),
+        listarMetasAdmin(),
+        totalDonaciones(),
       ]);
       setReportes(rs);
       setUsuarios(us);
       setDenuncias(ds);
       setComentarios(cs);
+      setMetas(ms);
+      setTotalDonado(total);
     } catch {
       setError("No se pudo cargar la información del panel de administración");
     } finally {
@@ -116,6 +132,43 @@ export default function AdminDashboardPage() {
     }
   }
 
+  async function manejarCrearMeta(e) {
+    e.preventDefault();
+    const objetivo = Number(metaObjetivo);
+    if (!metaTitulo.trim() || !objetivo || objetivo <= 0) {
+      setError("La meta necesita un título y un monto objetivo mayor a 0");
+      return;
+    }
+    setCreandoMeta(true);
+    setError(null);
+    try {
+      const creada = await crearMeta({
+        titulo: metaTitulo.trim(),
+        descripcion: metaDescripcion.trim() || null,
+        objetivo,
+      });
+      setMetas((prev) => [creada, ...prev]);
+      setMetaTitulo("");
+      setMetaDescripcion("");
+      setMetaObjetivo("");
+    } catch (err) {
+      setError(err.response?.data?.mensaje || "No se pudo crear la meta");
+    } finally {
+      setCreandoMeta(false);
+    }
+  }
+
+  async function manejarEliminarMeta(id) {
+    if (!window.confirm("¿Eliminar esta meta? Se borrarán también sus donaciones asociadas."))
+      return;
+    try {
+      await eliminarMeta(id);
+      setMetas((prev) => prev.filter((m) => m.id !== id));
+    } catch {
+      setError("No se pudo eliminar la meta");
+    }
+  }
+
   return (
     <div className="admin-page">
       <header className="admin-page__header">
@@ -147,6 +200,12 @@ export default function AdminDashboardPage() {
           onClick={() => setTab("comentarios")}
         >
           Comentarios ({comentarios.length})
+        </button>
+        <button
+          className={tab === "metas" ? "is-active" : ""}
+          onClick={() => setTab("metas")}
+        >
+          Metas ({metas.length})
         </button>
       </div>
 
@@ -318,6 +377,87 @@ export default function AdminDashboardPage() {
             )}
           </tbody>
         </table>
+      )}
+
+      {!cargando && tab === "metas" && (
+        <>
+          <p className="admin-total-donado">
+            Total donado (metas + donaciones generales):{" "}
+            <strong>${Number(totalDonado).toLocaleString("en-US")}</strong>
+          </p>
+
+          <form className="admin-form-row" onSubmit={manejarCrearMeta}>
+            <input
+              type="text"
+              placeholder="Título de la meta"
+              maxLength={120}
+              value={metaTitulo}
+              onChange={(e) => setMetaTitulo(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Descripción (opcional)"
+              maxLength={500}
+              value={metaDescripcion}
+              onChange={(e) => setMetaDescripcion(e.target.value)}
+            />
+            <input
+              type="number"
+              placeholder="Objetivo ($)"
+              min="1"
+              step="1"
+              value={metaObjetivo}
+              onChange={(e) => setMetaObjetivo(e.target.value)}
+              required
+            />
+            <button type="submit" className="admin-btn admin-btn--ok" disabled={creandoMeta}>
+              {creandoMeta ? "Creando…" : "Crear meta"}
+            </button>
+          </form>
+
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Objetivo</th>
+                <th>Recaudado</th>
+                <th>%</th>
+                <th>Fecha</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {metas.map((m) => {
+                const pct = m.objetivo > 0 ? ((m.recaudado / m.objetivo) * 100).toFixed(0) : 0;
+                return (
+                  <tr key={m.id}>
+                    <td>{m.titulo}</td>
+                    <td className="admin-table__descripcion">{m.descripcion || "—"}</td>
+                    <td>${Number(m.objetivo).toLocaleString("en-US")}</td>
+                    <td>${Number(m.recaudado).toLocaleString("en-US")}</td>
+                    <td>{pct}%</td>
+                    <td>{formatearFechaCompleta(m.creadoEn)}</td>
+                    <td>
+                      <button
+                        className="admin-btn admin-btn--danger"
+                        onClick={() => manejarEliminarMeta(m.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {metas.length === 0 && (
+                <tr>
+                  <td colSpan={7}>No hay metas. Crea la primera con el formulario de arriba.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </>
       )}
     </div>
   );

@@ -38,3 +38,22 @@ export async function listarComentariosAdmin() {
 export async function eliminarComentarioAdmin(id) {
   await api.delete(`/api/admin/comentarios/${id}`);
 }
+
+export async function listarMetasAdmin() {
+  const { data } = await api.get("/api/admin/metas");
+  return data;
+}
+
+export async function crearMeta({ titulo, descripcion, objetivo }) {
+  const { data } = await api.post("/api/admin/metas", { titulo, descripcion, objetivo });
+  return data;
+}
+
+export async function eliminarMeta(id) {
+  await api.delete(`/api/admin/metas/${id}`);
+}
+
+export async function totalDonaciones() {
+  const { data } = await api.get("/api/admin/donaciones/total");
+  return data.total;
+}

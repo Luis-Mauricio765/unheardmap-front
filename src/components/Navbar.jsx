@@ -29,9 +29,9 @@ export default function Navbar({ onReportarClick }) {
         <a href="#contacto" onClick={() => setMenuAbierto(false)}>
           Contacto
         </a>
-        <a href="#comunidad" onClick={() => setMenuAbierto(false)}>
-          Comunidad
-        </a>
+        <Link to="/donaciones" onClick={() => setMenuAbierto(false)}>
+          Donaciones
+        </Link>
 
         {isAuthenticated && onReportarClick && (
           <button className="navbar__cta" onClick={onReportarClick}>
