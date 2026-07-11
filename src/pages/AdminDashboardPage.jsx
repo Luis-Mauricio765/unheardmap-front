@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   listarUsuarios,
@@ -14,7 +15,7 @@ import {
   eliminarMeta,
   totalDonaciones,
 } from "../api/admin";
-import { labelDeTipo } from "../utils/crimeTypes";
+import { labelDeTipo, TIPOS_LISTA } from "../utils/crimeTypes";
 import { formatearFechaCompleta } from "../utils/dateHelpers";
 import "./AdminDashboard.css";
 
@@ -25,8 +26,59 @@ const MOTIVOS = {
   OTRO: "Otro",
 };
 
+// Ordena una copia de la lista por el campo indicado (numérico, booleano o texto)
+function ordenarLista(lista, campo, dir) {
+  const arr = [...lista];
+  arr.sort((a, b) => {
+    const va = a[campo];
+    const vb = b[campo];
+    let cmp;
+    if (typeof va === "number" && typeof vb === "number") {
+      cmp = va - vb;
+    } else if (typeof va === "boolean" && typeof vb === "boolean") {
+      cmp = Number(va) - Number(vb);
+    } else {
+      cmp = String(va ?? "").localeCompare(String(vb ?? ""), "es", {
+        numeric: true,
+        sensitivity: "base",
+      });
+    }
+    return dir === "asc" ? cmp : -cmp;
+  });
+  return arr;
+}
+
+// Encabezado de columna clicable para ordenar (asc/desc)
+function ThOrdenable({ campo, orden, onOrdenar, children }) {
+  const activo = orden.campo === campo;
+  return (
+    <th className="admin-th-sort" onClick={() => onOrdenar(campo)}>
+      {children}
+      <span className={`admin-th-sort__flecha ${activo ? "is-activa" : ""}`}>
+        {activo ? (orden.dir === "asc" ? "▲" : "▼") : "↕"}
+      </span>
+    </th>
+  );
+}
+
+// Celda de texto largo: truncada por defecto, clic para expandir/colapsar
+function CeldaExpandible({ texto }) {
+  const [expandida, setExpandida] = useState(false);
+  if (!texto) return <td>—</td>;
+  return (
+    <td
+      className={`admin-table__descripcion ${expandida ? "is-expandida" : ""}`}
+      onClick={() => setExpandida((v) => !v)}
+      title={expandida ? "Clic para contraer" : "Clic para ampliar"}
+    >
+      {texto}
+    </td>
+  );
+}
+
 export default function AdminDashboardPage() {
   const { username } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState("reportes");
 
   const [reportes, setReportes] = useState([]);
@@ -37,6 +89,22 @@ export default function AdminDashboardPage() {
   const [totalDonado, setTotalDonado] = useState(0);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
+
+  // Filtros y orden por tab
+  const [buscarReporte, setBuscarReporte] = useState("");
+  const [filtroTipoReporte, setFiltroTipoReporte] = useState("");
+  const [ordenReportes, setOrdenReportes] = useState({ campo: "id", dir: "desc" });
+
+  const [buscarUsuario, setBuscarUsuario] = useState("");
+  const [filtroEstadoUsuario, setFiltroEstadoUsuario] = useState("");
+  const [ordenUsuarios, setOrdenUsuarios] = useState({ campo: "username", dir: "asc" });
+
+  const [filtroMotivoDenuncia, setFiltroMotivoDenuncia] = useState("");
+  const [buscarDenuncia, setBuscarDenuncia] = useState("");
+  const [ordenDenuncias, setOrdenDenuncias] = useState({ campo: "creadoEn", dir: "desc" });
+
+  const [buscarComentario, setBuscarComentario] = useState("");
+  const [ordenComentarios, setOrdenComentarios] = useState({ campo: "creadoEn", dir: "desc" });
 
   // Formulario de nueva meta
   const [metaTitulo, setMetaTitulo] = useState("");
@@ -72,6 +140,73 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     cargar();
   }, [cargar]);
+
+  function alternarOrden(setOrden) {
+    return (campo) =>
+      setOrden((prev) =>
+        prev.campo === campo
+          ? { campo, dir: prev.dir === "asc" ? "desc" : "asc" }
+          : { campo, dir: "asc" }
+      );
+  }
+
+  // Listas filtradas + ordenadas
+  const reportesVisibles = useMemo(() => {
+    const q = buscarReporte.trim().toLowerCase();
+    let lista = reportes.filter((r) => {
+      if (filtroTipoReporte && r.tipo !== filtroTipoReporte) return false;
+      if (!q) return true;
+      return (
+        String(r.id).includes(q) ||
+        r.descripcion.toLowerCase().includes(q) ||
+        r.usuarioUsername.toLowerCase().includes(q)
+      );
+    });
+    return ordenarLista(lista, ordenReportes.campo, ordenReportes.dir);
+  }, [reportes, buscarReporte, filtroTipoReporte, ordenReportes]);
+
+  const usuariosVisibles = useMemo(() => {
+    const q = buscarUsuario.trim().toLowerCase();
+    let lista = usuarios.filter((u) => {
+      if (filtroEstadoUsuario === "activos" && !u.activo) return false;
+      if (filtroEstadoUsuario === "baneados" && u.activo) return false;
+      if (!q) return true;
+      return u.username.toLowerCase().includes(q);
+    });
+    return ordenarLista(lista, ordenUsuarios.campo, ordenUsuarios.dir);
+  }, [usuarios, buscarUsuario, filtroEstadoUsuario, ordenUsuarios]);
+
+  const denunciasVisibles = useMemo(() => {
+    const q = buscarDenuncia.trim().toLowerCase();
+    let lista = denuncias.filter((d) => {
+      if (filtroMotivoDenuncia && d.motivo !== filtroMotivoDenuncia) return false;
+      if (!q) return true;
+      return (
+        String(d.reporteId).includes(q) ||
+        d.denuncianteUsername.toLowerCase().includes(q) ||
+        (d.detalle ?? "").toLowerCase().includes(q) ||
+        (d.reporteDescripcion ?? "").toLowerCase().includes(q)
+      );
+    });
+    return ordenarLista(lista, ordenDenuncias.campo, ordenDenuncias.dir);
+  }, [denuncias, buscarDenuncia, filtroMotivoDenuncia, ordenDenuncias]);
+
+  const comentariosVisibles = useMemo(() => {
+    const q = buscarComentario.trim().toLowerCase();
+    let lista = comentarios.filter((c) => {
+      if (!q) return true;
+      return (
+        String(c.reporteId).includes(q) ||
+        c.texto.toLowerCase().includes(q) ||
+        c.usuarioUsername.toLowerCase().includes(q)
+      );
+    });
+    return ordenarLista(lista, ordenComentarios.campo, ordenComentarios.dir);
+  }, [comentarios, buscarComentario, ordenComentarios]);
+
+  function verEnMapa(reporteId) {
+    navigate(`/?reporte=${reporteId}`);
+  }
 
   async function manejarEliminarReporte(id) {
     if (!window.confirm(`¿Eliminar el reporte #${id}? Esta acción no se puede deshacer.`)) return;
@@ -172,8 +307,13 @@ export default function AdminDashboardPage() {
   return (
     <div className="admin-page">
       <header className="admin-page__header">
-        <h1>Panel de administración</h1>
-        <p className="admin-page__subtitle">Sesión de @{username}</p>
+        <div>
+          <h1>Panel de administración</h1>
+          <p className="admin-page__subtitle">Sesión de @{username}</p>
+        </div>
+        <Link to="/" className="admin-volver">
+          ← Volver al mapa
+        </Link>
       </header>
 
       <div className="admin-tabs">
@@ -213,170 +353,308 @@ export default function AdminDashboardPage() {
       {cargando && <p className="admin-loading">Cargando…</p>}
 
       {!cargando && tab === "reportes" && (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Tipo</th>
-              <th>Descripción</th>
-              <th>Publicado por</th>
-              <th>Puntuación</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {reportes.map((r) => (
-              <tr key={r.id}>
-                <td>{r.id}</td>
-                <td>{labelDeTipo(r.tipo)}</td>
-                <td className="admin-table__descripcion">{r.descripcion}</td>
-                <td>@{r.usuarioUsername}</td>
-                <td>{r.puntuacion}</td>
-                <td>
-                  <button className="admin-btn admin-btn--danger" onClick={() => manejarEliminarReporte(r.id)}>
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {reportes.length === 0 && (
+        <>
+          <div className="admin-controles">
+            <input
+              type="search"
+              placeholder="Buscar por ID, descripción o usuario…"
+              value={buscarReporte}
+              onChange={(e) => setBuscarReporte(e.target.value)}
+            />
+            <select
+              value={filtroTipoReporte}
+              onChange={(e) => setFiltroTipoReporte(e.target.value)}
+            >
+              <option value="">Todos los tipos</option>
+              {TIPOS_LISTA.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+            <span className="admin-controles__conteo">
+              {reportesVisibles.length} de {reportes.length}
+            </span>
+          </div>
+
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan={6}>No hay reportes.</td>
+                <ThOrdenable campo="id" orden={ordenReportes} onOrdenar={alternarOrden(setOrdenReportes)}>
+                  ID
+                </ThOrdenable>
+                <ThOrdenable campo="tipo" orden={ordenReportes} onOrdenar={alternarOrden(setOrdenReportes)}>
+                  Tipo
+                </ThOrdenable>
+                <th>Descripción</th>
+                <ThOrdenable campo="usuarioUsername" orden={ordenReportes} onOrdenar={alternarOrden(setOrdenReportes)}>
+                  Publicado por
+                </ThOrdenable>
+                <ThOrdenable campo="puntuacion" orden={ordenReportes} onOrdenar={alternarOrden(setOrdenReportes)}>
+                  Puntuación
+                </ThOrdenable>
+                <th></th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {reportesVisibles.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.id}</td>
+                  <td>{labelDeTipo(r.tipo)}</td>
+                  <CeldaExpandible texto={r.descripcion} />
+                  <td>@{r.usuarioUsername}</td>
+                  <td>{r.puntuacion}</td>
+                  <td>
+                    <div className="admin-acciones">
+                      <button className="admin-btn admin-btn--mapa" onClick={() => verEnMapa(r.id)}>
+                        📍 Ver en mapa
+                      </button>
+                      <button
+                        className="admin-btn admin-btn--danger"
+                        onClick={() => manejarEliminarReporte(r.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {reportesVisibles.length === 0 && (
+                <tr>
+                  <td colSpan={6}>No hay reportes que coincidan.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </>
       )}
 
       {!cargando && tab === "usuarios" && (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Rol</th>
-              <th>Publicaciones</th>
-              <th>Estado</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios.map((u) => (
-              <tr key={u.id}>
-                <td>@{u.username}</td>
-                <td>{u.rol}</td>
-                <td>{u.totalReportes}</td>
-                <td>
-                  <span className={`admin-status ${u.activo ? "is-active" : "is-banned"}`}>
-                    {u.activo ? "Activo" : "Baneado"}
-                  </span>
-                </td>
-                <td>
-                  {u.username === username ? (
-                    <span className="admin-note">(tú)</span>
-                  ) : (
-                    <button
-                      className={`admin-btn ${u.activo ? "admin-btn--danger" : "admin-btn--ok"}`}
-                      onClick={() => manejarCambiarEstado(u)}
-                    >
-                      {u.activo ? "Banear" : "Desbanear"}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {usuarios.length === 0 && (
+        <>
+          <div className="admin-controles">
+            <input
+              type="search"
+              placeholder="Buscar por nombre de usuario…"
+              value={buscarUsuario}
+              onChange={(e) => setBuscarUsuario(e.target.value)}
+            />
+            <select
+              value={filtroEstadoUsuario}
+              onChange={(e) => setFiltroEstadoUsuario(e.target.value)}
+            >
+              <option value="">Todos los estados</option>
+              <option value="activos">Activos</option>
+              <option value="baneados">Baneados</option>
+            </select>
+            <span className="admin-controles__conteo">
+              {usuariosVisibles.length} de {usuarios.length}
+            </span>
+          </div>
+
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan={5}>No hay usuarios.</td>
+                <ThOrdenable campo="username" orden={ordenUsuarios} onOrdenar={alternarOrden(setOrdenUsuarios)}>
+                  Usuario
+                </ThOrdenable>
+                <ThOrdenable campo="rol" orden={ordenUsuarios} onOrdenar={alternarOrden(setOrdenUsuarios)}>
+                  Rol
+                </ThOrdenable>
+                <ThOrdenable campo="totalReportes" orden={ordenUsuarios} onOrdenar={alternarOrden(setOrdenUsuarios)}>
+                  Publicaciones
+                </ThOrdenable>
+                <ThOrdenable campo="activo" orden={ordenUsuarios} onOrdenar={alternarOrden(setOrdenUsuarios)}>
+                  Estado
+                </ThOrdenable>
+                <th></th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {usuariosVisibles.map((u) => (
+                <tr key={u.id}>
+                  <td>@{u.username}</td>
+                  <td>{u.rol}</td>
+                  <td>{u.totalReportes}</td>
+                  <td>
+                    <span className={`admin-status ${u.activo ? "is-active" : "is-banned"}`}>
+                      {u.activo ? "Activo" : "Baneado"}
+                    </span>
+                  </td>
+                  <td>
+                    {u.username === username ? (
+                      <span className="admin-note">(tú)</span>
+                    ) : (
+                      <button
+                        className={`admin-btn ${u.activo ? "admin-btn--danger" : "admin-btn--ok"}`}
+                        onClick={() => manejarCambiarEstado(u)}
+                      >
+                        {u.activo ? "Banear" : "Desbanear"}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {usuariosVisibles.length === 0 && (
+                <tr>
+                  <td colSpan={5}>No hay usuarios que coincidan.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </>
       )}
 
       {!cargando && tab === "denuncias" && (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Motivo</th>
-              <th>Detalle</th>
-              <th>Denunciante</th>
-              <th>Reporte</th>
-              <th>Fecha</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {denuncias.map((d) => (
-              <tr key={d.id}>
-                <td>{MOTIVOS[d.motivo] ?? d.motivo}</td>
-                <td className="admin-table__descripcion">{d.detalle || "—"}</td>
-                <td>@{d.denuncianteUsername}</td>
-                <td className="admin-table__descripcion">
-                  #{d.reporteId} · {labelDeTipo(d.reporteTipo)} · {d.reporteDescripcion}
-                </td>
-                <td>{formatearFechaCompleta(d.creadoEn)}</td>
-                <td>
-                  <div className="admin-acciones">
-                    <button
-                      className="admin-btn admin-btn--danger"
-                      onClick={() => manejarEliminarReporteDenunciado(d)}
-                    >
-                      Eliminar reporte
-                    </button>
-                    <button
-                      className="admin-btn admin-btn--neutral"
-                      onClick={() => manejarDescartarDenuncia(d.id)}
-                    >
-                      Descartar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {denuncias.length === 0 && (
+        <>
+          <div className="admin-controles">
+            <input
+              type="search"
+              placeholder="Buscar por reporte, denunciante o detalle…"
+              value={buscarDenuncia}
+              onChange={(e) => setBuscarDenuncia(e.target.value)}
+            />
+            <select
+              value={filtroMotivoDenuncia}
+              onChange={(e) => setFiltroMotivoDenuncia(e.target.value)}
+            >
+              <option value="">Todos los motivos</option>
+              {Object.entries(MOTIVOS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <span className="admin-controles__conteo">
+              {denunciasVisibles.length} de {denuncias.length}
+            </span>
+          </div>
+
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan={6}>No hay denuncias pendientes.</td>
+                <ThOrdenable campo="motivo" orden={ordenDenuncias} onOrdenar={alternarOrden(setOrdenDenuncias)}>
+                  Motivo
+                </ThOrdenable>
+                <th>Detalle</th>
+                <ThOrdenable campo="denuncianteUsername" orden={ordenDenuncias} onOrdenar={alternarOrden(setOrdenDenuncias)}>
+                  Denunciante
+                </ThOrdenable>
+                <ThOrdenable campo="reporteId" orden={ordenDenuncias} onOrdenar={alternarOrden(setOrdenDenuncias)}>
+                  Reporte
+                </ThOrdenable>
+                <ThOrdenable campo="creadoEn" orden={ordenDenuncias} onOrdenar={alternarOrden(setOrdenDenuncias)}>
+                  Fecha
+                </ThOrdenable>
+                <th></th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {denunciasVisibles.map((d) => (
+                <tr key={d.id}>
+                  <td>{MOTIVOS[d.motivo] ?? d.motivo}</td>
+                  <CeldaExpandible texto={d.detalle} />
+                  <td>@{d.denuncianteUsername}</td>
+                  <CeldaExpandible
+                    texto={`#${d.reporteId} · ${labelDeTipo(d.reporteTipo)} · ${d.reporteDescripcion}`}
+                  />
+                  <td>{formatearFechaCompleta(d.creadoEn)}</td>
+                  <td>
+                    <div className="admin-acciones">
+                      <button
+                        className="admin-btn admin-btn--mapa"
+                        onClick={() => verEnMapa(d.reporteId)}
+                      >
+                        📍 Ver en mapa
+                      </button>
+                      <button
+                        className="admin-btn admin-btn--danger"
+                        onClick={() => manejarEliminarReporteDenunciado(d)}
+                      >
+                        Eliminar reporte
+                      </button>
+                      <button
+                        className="admin-btn admin-btn--neutral"
+                        onClick={() => manejarDescartarDenuncia(d.id)}
+                      >
+                        Descartar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {denunciasVisibles.length === 0 && (
+                <tr>
+                  <td colSpan={6}>No hay denuncias que coincidan.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </>
       )}
 
       {!cargando && tab === "comentarios" && (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Comentario</th>
-              <th>Autor</th>
-              <th>Reporte</th>
-              <th>Fecha</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {comentarios.map((c) => (
-              <tr key={c.id}>
-                <td className="admin-table__descripcion">{c.texto}</td>
-                <td>@{c.usuarioUsername}</td>
-                <td>#{c.reporteId}</td>
-                <td>{formatearFechaCompleta(c.creadoEn)}</td>
-                <td>
-                  <button
-                    className="admin-btn admin-btn--danger"
-                    onClick={() => manejarEliminarComentario(c.id)}
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {comentarios.length === 0 && (
+        <>
+          <div className="admin-controles">
+            <input
+              type="search"
+              placeholder="Buscar por texto, autor o reporte…"
+              value={buscarComentario}
+              onChange={(e) => setBuscarComentario(e.target.value)}
+            />
+            <span className="admin-controles__conteo">
+              {comentariosVisibles.length} de {comentarios.length}
+            </span>
+          </div>
+
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan={5}>No hay comentarios.</td>
+                <th>Comentario</th>
+                <ThOrdenable campo="usuarioUsername" orden={ordenComentarios} onOrdenar={alternarOrden(setOrdenComentarios)}>
+                  Autor
+                </ThOrdenable>
+                <ThOrdenable campo="reporteId" orden={ordenComentarios} onOrdenar={alternarOrden(setOrdenComentarios)}>
+                  Reporte
+                </ThOrdenable>
+                <ThOrdenable campo="creadoEn" orden={ordenComentarios} onOrdenar={alternarOrden(setOrdenComentarios)}>
+                  Fecha
+                </ThOrdenable>
+                <th></th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {comentariosVisibles.map((c) => (
+                <tr key={c.id}>
+                  <CeldaExpandible texto={c.texto} />
+                  <td>@{c.usuarioUsername}</td>
+                  <td>#{c.reporteId}</td>
+                  <td>{formatearFechaCompleta(c.creadoEn)}</td>
+                  <td>
+                    <div className="admin-acciones">
+                      <button
+                        className="admin-btn admin-btn--mapa"
+                        onClick={() => verEnMapa(c.reporteId)}
+                      >
+                        📍 Ver en mapa
+                      </button>
+                      <button
+                        className="admin-btn admin-btn--danger"
+                        onClick={() => manejarEliminarComentario(c.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {comentariosVisibles.length === 0 && (
+                <tr>
+                  <td colSpan={5}>No hay comentarios que coincidan.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </>
       )}
 
       {!cargando && tab === "metas" && (
@@ -434,7 +712,7 @@ export default function AdminDashboardPage() {
                 return (
                   <tr key={m.id}>
                     <td>{m.titulo}</td>
-                    <td className="admin-table__descripcion">{m.descripcion || "—"}</td>
+                    <CeldaExpandible texto={m.descripcion} />
                     <td>${Number(m.objetivo).toLocaleString("en-US")}</td>
                     <td>${Number(m.recaudado).toLocaleString("en-US")}</td>
                     <td>{pct}%</td>

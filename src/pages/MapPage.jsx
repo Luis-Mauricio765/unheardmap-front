@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import MapView from "../components/MapView";
 import FilterPanel from "../components/FilterPanel";
@@ -6,6 +7,7 @@ import ReportDetailPanel from "../components/ReportDetailPanel";
 import ReportFormModal from "../components/ReportFormModal";
 import AdPlaceholder from "../components/AdPlaceholder";
 import { useAuth } from "../context/AuthContext";
+import { obtenerReporte } from "../api/reportes";
 import "./MapPage.css";
 
 export default function MapPage() {
@@ -16,6 +18,23 @@ export default function MapPage() {
   const [modoMarcar, setModoMarcar] = useState(false);
   const [ubicacionElegida, setUbicacionElegida] = useState(null);
   const [refrescarTick, setRefrescarTick] = useState(0);
+  const [focoMapa, setFocoMapa] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Si llegamos con ?reporte=<id> (p. ej. desde el panel de admin), volamos a
+  // sus coordenadas y abrimos su detalle.
+  useEffect(() => {
+    const reporteParam = searchParams.get("reporte");
+    if (!reporteParam) return;
+
+    setSearchParams({}, { replace: true });
+    obtenerReporte(reporteParam)
+      .then((r) => {
+        setFocoMapa({ lat: r.latitud, lng: r.longitud });
+        setReporteSeleccionado(r.id);
+      })
+      .catch(() => {});
+  }, [searchParams, setSearchParams]);
 
   // Al pulsar "+ Reportar" en la navbar: cerramos cualquier panel y activamos
   // el modo de selección de ubicación sobre el mapa.
@@ -45,6 +64,7 @@ export default function MapPage() {
           onSelectReporte={setReporteSeleccionado}
           modoMarcar={modoMarcar}
           onPickLocation={manejarClicMapa}
+          foco={focoMapa}
         />
 
         <FilterPanel filtroTipo={filtroTipo} onChangeFiltro={setFiltroTipo} />

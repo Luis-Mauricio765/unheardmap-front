@@ -4,9 +4,33 @@
   background: var(--navy-800);
 }
 
+.admin-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .admin-page__header h1 {
   color: #fff;
   font-size: 24px;
+}
+
+.admin-volver {
+  display: inline-block;
+  color: var(--accent);
+  border: 1px solid rgba(23, 162, 160, 0.45);
+  background: rgba(23, 162, 160, 0.12);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.admin-volver:hover {
+  background: rgba(23, 162, 160, 0.25);
 }
 
 .admin-page__subtitle {
@@ -167,4 +191,90 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.admin-table__descripcion:hover {
+  color: var(--accent-dark);
+}
+
+.admin-table__descripcion.is-expandida {
+  white-space: normal;
+  overflow: visible;
+  word-break: break-word;
+  max-width: 420px;
+}
+
+/* ── Controles de filtro y búsqueda ───────────────────── */
+.admin-controles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  background: var(--surface);
+  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.admin-controles input[type="search"] {
+  flex: 1;
+  min-width: 220px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+}
+
+.admin-controles input[type="search"]:focus {
+  border-color: var(--accent);
+}
+
+.admin-controles select {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.admin-controles__conteo {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Encabezados ordenables ───────────────────────────── */
+.admin-th-sort {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.admin-th-sort:hover {
+  color: var(--accent-dark);
+}
+
+.admin-th-sort__flecha {
+  margin-left: 5px;
+  font-size: 10px;
+  opacity: 0.45;
+}
+
+.admin-th-sort__flecha.is-activa {
+  opacity: 1;
+  color: var(--accent-dark);
+}
+
+.admin-btn--mapa {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent-dark);
+}
+
+.admin-btn--mapa:hover {
+  background: rgba(23, 162, 160, 0.12);
 }

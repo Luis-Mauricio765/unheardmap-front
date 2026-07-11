@@ -57,6 +57,19 @@ function BoundsWatcher({ onBoundsChange, onZoomChange, modoMarcar, onPickLocatio
   return null;
 }
 
+// Vuela a la coordenada indicada (p. ej. al llegar desde el panel de admin)
+function FlyToFoco({ foco }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (foco) {
+      map.flyTo([foco.lat, foco.lng], 16, { duration: 1.2 });
+    }
+  }, [foco, map]);
+
+  return null;
+}
+
 // Capa de marcadores manejada manualmente (más control sobre el divIcon animado)
 function MarkerLayer({ reportes, onSelect }) {
   const map = useMap();
@@ -103,6 +116,7 @@ export default function MapView({
   onSelectReporte,
   modoMarcar = false,
   onPickLocation = () => {},
+  foco = null,
 }) {
   const [reportes, setReportes] = useState([]);
   const [zoomActual, setZoomActual] = useState(ZOOM_INICIAL);
@@ -172,6 +186,7 @@ export default function MapView({
         onPickLocation={onPickLocation}
       />
       <MarkerLayer reportes={reportes} onSelect={onSelectReporte} />
+      <FlyToFoco foco={foco} />
 
       {marcadoresOcultosPorZoom && (
         <div className="map-zoom-hint">Acércate más para ver los reportes de la zona</div>
