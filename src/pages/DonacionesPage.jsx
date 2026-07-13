@@ -3,15 +3,14 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import { listarMetas, donar } from "../api/donaciones";
+import {
+  formatearNumeroTarjeta,
+  formatearVencimiento,
+  validarVencimiento,
+} from "../utils/tarjeta";
 import "./Donaciones.css";
 
 const PRESETS = [1, 5, 10, 25];
-
-// Agrupa el número de tarjeta en bloques de 4 dígitos (solo cosmético, jamás se envía)
-function formatearNumeroTarjeta(valor) {
-  const digitos = valor.replace(/\D/g, "").slice(0, 16);
-  return digitos.match(/.{1,4}/g)?.join(" ") ?? digitos;
-}
 
 function formatearMonto(valor) {
   return `$${Number(valor).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
@@ -173,6 +172,11 @@ function DonacionModal({ meta, onClose, onDonado }) {
       setError("El monto máximo por donación es $10,000");
       return;
     }
+    const errorVencimiento = validarVencimiento(vencimiento);
+    if (errorVencimiento) {
+      setError(errorVencimiento);
+      return;
+    }
 
     setEnviando(true);
     setError(null);
@@ -256,9 +260,10 @@ function DonacionModal({ meta, onClose, onDonado }) {
               <input
                 id="dona-venc"
                 type="text"
+                inputMode="numeric"
                 maxLength={5}
                 value={vencimiento}
-                onChange={(e) => setVencimiento(e.target.value)}
+                onChange={(e) => setVencimiento(formatearVencimiento(e.target.value))}
                 placeholder="MM/AA"
                 required
               />

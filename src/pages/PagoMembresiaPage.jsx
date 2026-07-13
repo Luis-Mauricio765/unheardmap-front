@@ -4,13 +4,12 @@ import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import { pagarMembresia } from "../api/membresia";
 import { formatearFechaCompleta } from "../utils/dateHelpers";
+import {
+  formatearNumeroTarjeta,
+  formatearVencimiento,
+  validarVencimiento,
+} from "../utils/tarjeta";
 import "./PagoMembresia.css";
-
-// Agrupa el número de tarjeta en bloques de 4 dígitos: "0000 0000 0000 0000"
-function formatearNumeroTarjeta(valor) {
-  const digitos = valor.replace(/\D/g, "").slice(0, 16);
-  return digitos.match(/.{1,4}/g)?.join(" ") ?? digitos;
-}
 
 const BENEFICIOS = [
   "Navega sin anuncios",
@@ -36,6 +35,11 @@ export default function PagoMembresiaPage() {
 
   async function manejarPago(e) {
     e.preventDefault();
+    const errorVencimiento = validarVencimiento(vencimiento);
+    if (errorVencimiento) {
+      setError(errorVencimiento);
+      return;
+    }
     setPagando(true);
     setError(null);
     try {
@@ -108,9 +112,10 @@ export default function PagoMembresiaPage() {
                 <input
                   id="vencimiento"
                   type="text"
+                  inputMode="numeric"
                   maxLength={5}
                   value={vencimiento}
-                  onChange={(e) => setVencimiento(e.target.value)}
+                  onChange={(e) => setVencimiento(formatearVencimiento(e.target.value))}
                   placeholder="MM/AA"
                   required
                 />

@@ -11,9 +11,9 @@ export default function Navbar({ onReportarClick }) {
   return (
     <header className="navbar">
       <div className="navbar__brand">
-        <span className="navbar__mark" aria-hidden="true" />
-        <Link to="/" className="navbar__title">
-          Unheard Map
+        <Link to="/" className="navbar__brand-link">
+          <img src="/logo.png" alt="Unheard Map" className="navbar__logo" />
+          <span className="navbar__title">Unheard Map</span>
         </Link>
       </div>
 
