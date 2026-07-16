@@ -57,6 +57,50 @@ function BoundsWatcher({ onBoundsChange, onZoomChange, modoMarcar, onPickLocatio
   return null;
 }
 
+// Marcador azul con la ubicación actual del usuario
+function UserLocationMarker({ ubicacion }) {
+  const map = useMap();
+  const markerRef = useRef(null);
+
+  useEffect(() => {
+    if (!ubicacion) {
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+      }
+      return;
+    }
+
+    const icon = L.divIcon({
+      className: "user-marker-wrapper",
+      html: `
+        <span class="user-marker-ring"></span>
+        <span class="user-marker-dot"></span>
+      `,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+    });
+
+    if (markerRef.current) {
+      markerRef.current.setLatLng([ubicacion.lat, ubicacion.lng]);
+    } else {
+      markerRef.current = L.marker([ubicacion.lat, ubicacion.lng], {
+        icon,
+        interactive: false,
+        zIndexOffset: 500,
+      }).addTo(map);
+    }
+  }, [ubicacion, map]);
+
+  useEffect(() => {
+    return () => {
+      if (markerRef.current) map.removeLayer(markerRef.current);
+    };
+  }, [map]);
+
+  return null;
+}
+
 // Vuela a la coordenada indicada (p. ej. al llegar desde el panel de admin)
 function FlyToFoco({ foco }) {
   const map = useMap();
@@ -117,6 +161,7 @@ export default function MapView({
   modoMarcar = false,
   onPickLocation = () => {},
   foco = null,
+  ubicacionUsuario = null,
 }) {
   const [reportes, setReportes] = useState([]);
   const [zoomActual, setZoomActual] = useState(ZOOM_INICIAL);
@@ -187,6 +232,7 @@ export default function MapView({
       />
       <MarkerLayer reportes={reportes} onSelect={onSelectReporte} />
       <FlyToFoco foco={foco} />
+      <UserLocationMarker ubicacion={ubicacionUsuario} />
 
       {marcadoresOcultosPorZoom && (
         <div className="map-zoom-hint">Acércate más para ver los reportes de la zona</div>

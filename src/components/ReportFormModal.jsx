@@ -4,7 +4,7 @@ import { maxFechaInput } from "../utils/dateHelpers";
 import { crearReporte } from "../api/reportes";
 import "./ReportFormModal.css";
 
-export default function ReportFormModal({ ubicacion, onClose, onCreado }) {
+export default function ReportFormModal({ ubicacion, cercaUsuario = null, onClose, onCreado }) {
   const [tipo, setTipo] = useState("ROBO");
   const [descripcion, setDescripcion] = useState("");
   const [fechaSuceso, setFechaSuceso] = useState(maxFechaInput());
@@ -31,6 +31,7 @@ export default function ReportFormModal({ ubicacion, onClose, onCreado }) {
         tipo,
         descripcion: descripcion.trim(),
         fechaSuceso: new Date(fechaSuceso).toISOString(),
+        cercaUsuario,
       });
       onCreado();
     } catch (err) {

@@ -1,4 +1,79 @@
-.ad-placeholder {
+/* ── Base compartida ───────────────────────────────────── */
+.ad {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.ad__tag {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 1;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.ad__media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  flex-shrink: 0;
+}
+
+.ad__titulo {
+  display: block;
+  font-size: 13.5px;
+  color: var(--navy-800);
+}
+
+.ad__texto {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.ad__cta {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ad__cta:hover {
+  background: var(--accent-dark);
+}
+
+.ad__quitar {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.ad__quitar:hover {
+  color: var(--accent-dark);
+}
+
+/* ── Variante banner (flotante sobre el mapa) ──────────── */
+.ad--banner {
   position: absolute;
   bottom: 14px;
   left: 50%;
@@ -6,42 +81,55 @@
   z-index: 500; /* debajo del panel de detalle y modales */
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--surface);
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-sm);
-  padding: 8px 14px;
-  box-shadow: var(--shadow-lg);
-  max-width: calc(100% - 32px);
+  gap: 12px;
+  padding: 10px 14px 10px 10px;
+  max-width: min(560px, calc(100% - 32px));
 }
 
-.ad-placeholder__tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 6px;
+.ad--banner .ad__media {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  font-size: 26px;
+}
+
+.ad--banner .ad__body {
+  min-width: 0;
+  padding-right: 66px; /* espacio para la etiqueta "Publicidad" */
+}
+
+.ad--banner .ad__acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
   flex-shrink: 0;
 }
 
-.ad-placeholder__contenido {
+@media (max-width: 560px) {
+  .ad--banner .ad__texto {
+    display: none;
+  }
+}
+
+/* ── Variante card (dentro de paneles) ─────────────────── */
+.ad--card {
+  margin-top: 18px;
+}
+
+.ad--card .ad__media {
+  height: 86px;
+  font-size: 38px;
+}
+
+.ad--card .ad__body {
+  padding: 12px 14px 0;
+}
+
+.ad--card .ad__acciones {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  flex-wrap: wrap;
-}
-
-.ad-placeholder__texto {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-}
-
-.ad-placeholder__quitar {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent-dark);
-  white-space: nowrap;
+  padding: 12px 14px 14px;
 }

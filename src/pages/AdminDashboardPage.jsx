@@ -407,7 +407,7 @@ export default function AdminDashboardPage() {
                   <td>
                     <div className="admin-acciones">
                       <button className="admin-btn admin-btn--mapa" onClick={() => verEnMapa(r.id)}>
-                        📍 Ver en mapa
+                        Ver en mapa
                       </button>
                       <button
                         className="admin-btn admin-btn--danger"
@@ -564,7 +564,7 @@ export default function AdminDashboardPage() {
                         className="admin-btn admin-btn--mapa"
                         onClick={() => verEnMapa(d.reporteId)}
                       >
-                        📍 Ver en mapa
+                        Ver en mapa
                       </button>
                       <button
                         className="admin-btn admin-btn--danger"
@@ -635,7 +635,7 @@ export default function AdminDashboardPage() {
                         className="admin-btn admin-btn--mapa"
                         onClick={() => verEnMapa(c.reporteId)}
                       >
-                        📍 Ver en mapa
+                        Ver en mapa
                       </button>
                       <button
                         className="admin-btn admin-btn--danger"

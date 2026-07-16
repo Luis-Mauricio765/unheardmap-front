@@ -76,6 +76,24 @@
   border: 1px solid var(--border);
 }
 
+.detail-panel__ubicacion {
+  margin-top: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.detail-panel__ubicacion.is-cerca {
+  background: rgba(23, 162, 160, 0.12);
+  color: var(--accent-dark);
+}
+
+.detail-panel__ubicacion.is-lejos {
+  background: rgba(241, 196, 15, 0.16);
+  color: #8a6d0b;
+}
+
 .detail-panel__votes {
   margin-top: 22px;
   display: flex;

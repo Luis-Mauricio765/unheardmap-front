@@ -7,6 +7,7 @@ import { eliminarComentarioAdmin } from "../api/admin";
 import { labelDeTipo, colorDeTipo } from "../utils/crimeTypes";
 import { formatearFechaRelativa, formatearFechaCompleta } from "../utils/dateHelpers";
 import { useAuth } from "../context/AuthContext";
+import AdPlaceholder from "./AdPlaceholder";
 import "./ReportDetailPanel.css";
 
 const MOTIVOS_DENUNCIA = [
@@ -142,6 +143,18 @@ export default function ReportDetailPanel({ reporteId, onClose, onCambio }) {
 
           <p className="detail-panel__descripcion">{reporte.descripcion}</p>
 
+          {reporte.cercaUsuario != null && (
+            <p
+              className={`detail-panel__ubicacion ${
+                reporte.cercaUsuario ? "is-cerca" : "is-lejos"
+              }`}
+            >
+              {reporte.cercaUsuario
+                ? "Incidente dentro de la ubicación del usuario"
+                : "Incidente lejos de la ubicación del usuario"}
+            </p>
+          )}
+
           <div className="detail-panel__votes">
             <button
               className={`vote-btn ${reporte.miVoto === 1 ? "vote-btn--up-active" : ""}`}
@@ -266,6 +279,8 @@ export default function ReportDetailPanel({ reporteId, onClose, onCambio }) {
               </button>
             )}
           </section>
+
+          {!esMiembro && <AdPlaceholder variante="card" />}
         </>
       )}
     </aside>
